@@ -1,0 +1,24 @@
+QUERY#1)TIME INTERVAL BETWEEN 2 TWEETS
+
+	var queryFrom={"created_at": /Fri Oct 14 00:45.*/}
+	var queryTo={"created_at": /Fri Oct 14 00:46.*/}
+	var countFrom=db.tweetHillary.find(queryFrom).count()
+	var countTo=db.tweetHillary.find(queryTo).count()
+
+QUERY#2)FINDING THE TOP LANGUAGES
+
+	db.tweetHillary.aggregate([ {$group:{ _id:'$lang', count:{$sum:1} }},{ $sort:{ count:-1 }},{$limit:5}])
+
+QUERY#3)screen_names OF PEOPLE WHO HAVE TWEETED IN LANGUAGE
+	
+	db.tweetHillary.find({lang:"en"},{"user.screen_name":1,_id:0})
+
+QUERY#4)TOP LOCATIONS OF PEOPLE WHO HAVE TWEETED IN ENGLISH/SPANISH
+
+	db.tweetHillary.aggregate([ {$match:{"lang":"en"}},{$match:{"lang":{$ne:null}}},{$group:{ _id:'$user.location', count:{$sum:1} }},{ $sort:{ count:-1 }},{$limit:10},{$skip:1}])
+
+QUERY#5)TOP WITH MOST FOLLOWERS
+
+	db.tweetHillary.ensureIndex({"user.followers_count":1})
+	db.tweetHillary.getIndexes()
+	db.tweetHillary.aggregate([ {$group:{ _id:'$user.name', count:{$max:"$user.followers_count"} }},{ $sort:{ count:-1 }},{$limit:5}])
